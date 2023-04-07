@@ -16,6 +16,7 @@ export async function loader() {
 }
 
 export default function Index() {
+    let once = false
     const waifURL = useLoaderData() as string
     const [width, setWidth] = useState(500)
     const [image, setImage] = useState<Blob>()
@@ -28,6 +29,10 @@ export default function Index() {
     const {convert, webp} = useWebpHook()
 
     async function initHandler() {
+        if (once) {
+            return
+        }
+
         const resp = await fetch(`https://wsrv.nl?url=${waifURL}`)
         const blob = await resp.blob()
         const s1 = performance.now()
@@ -42,11 +47,10 @@ export default function Index() {
         })
     }
 
-    // TODO: BLOB 으로 불러오는 페이지 만들어서 테스트 / GIF to Webm POC
-    
     useEffect(() => {
-        setWidth((innerWidth / 3) - 20)
         initHandler()
+        setWidth((innerWidth / 3) - 20)
+        once = true
     }, [])
 
     return (

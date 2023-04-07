@@ -61,6 +61,7 @@ export default function GIF() {
         setGif(blob)
         setGifSource(url)
         await transcode(blob)
+        URL.revokeObjectURL(url)
     };
 
     useEffect(() => {
