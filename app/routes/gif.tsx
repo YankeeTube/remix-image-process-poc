@@ -1,14 +1,8 @@
 import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg';
 import {useEffect, useState} from "react";
-import type {HeadersFunction} from "@remix-run/node";
 import {useLoaderData} from "react-router";
 
 const MB = 1000 * 1000
-
-export const headers: HeadersFunction = () => ({
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Embedder-Policy": "require-corp",
-});
 
 export async function loader() {
     const keywords = ['blush', 'dance', 'highfive', 'cuddle', 'smile', 'wave', 'poke']
@@ -18,9 +12,9 @@ export async function loader() {
     return url
 }
 
-const ffmpeg = createFFmpeg({log: false});
-
 export default function GIF() {
+    let once = false;
+    const ffmpeg = createFFmpeg({log: false});
     const waifURL = useLoaderData() as string
     const [gif, setGif] = useState<Blob | File>()
     const [width, setWidth] = useState(500)
@@ -29,6 +23,7 @@ export default function GIF() {
     const [gifSource, setGifSource] = useState<string>('')
 
     const transcode = async (file: Blob) => {
+        await ffmpeg.load()
         const start = performance.now()
         const threadCount = String(navigator.hardwareConcurrency || 1)
         const videoName = 'output.webm'
@@ -54,7 +49,10 @@ export default function GIF() {
     }
 
     const init = async () => {
-        await ffmpeg.load()
+        if (once) {
+            return
+        }
+
         const resp = await fetch(`https://wsrv.nl?url=${waifURL}&n=-1`)
         const blob = await resp.blob()
         const url = URL.createObjectURL(blob)
@@ -67,6 +65,7 @@ export default function GIF() {
     useEffect(() => {
         setWidth((innerWidth / 3) - 20)
         init()
+        once = true
     }, [])
 
     return (

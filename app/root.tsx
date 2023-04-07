@@ -1,4 +1,4 @@
-import {Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration,} from "@remix-run/react";
+import {Link, Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration,} from "@remix-run/react";
 import {json} from "@remix-run/router";
 import * as process from "process";
 import {useLoaderData} from "react-router";
@@ -20,6 +20,13 @@ export default function App() {
             <Links/>
         </head>
         <body>
+        <div style={{display: 'flex', alignItems: 'start', gap: '40px'}}>
+            <Link to={'/'}>Image to Webp</Link>
+            <Link to={'/gif'}>GIF to Webm</Link>
+            <Link to={'/upload'}>Upload Image to Webp</Link>
+            <Link to={'/gif_upload'}>Upload GIF to Webm</Link>
+
+        </div>
         <Outlet/>
         <ScrollRestoration/>
         <Scripts/>

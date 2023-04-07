@@ -1,16 +1,11 @@
 import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg';
 import type {ChangeEvent} from "react";
 import {useEffect, useState} from "react";
-import type {HeadersFunction} from "@remix-run/node";
 
 const MB = 1000 * 1000
 
-export const headers: HeadersFunction = () => ({
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Embedder-Policy": "require-corp",
-});
 
-const ffmpeg = createFFmpeg({log: true});
+const ffmpeg = createFFmpeg({log: false});
 export default function GIF() {
     const [gif, setGif] = useState<Blob | File>()
     const [width, setWidth] = useState(500)
@@ -25,8 +20,10 @@ export default function GIF() {
         const videoName = name.replace(/(\.\w+)$/, '.webm');
         const options = [
             '-i', name,
+            '-c', 'vp9',
             '-c:v', 'libvpx',
             '-b:v', '1M',
+            '-crf', '25',
             '-pix_fmt', 'yuv420p',
             '-auto-alt-ref', '0',
             '-speed', '10',
@@ -77,7 +74,7 @@ export default function GIF() {
                     <p>{Math.round(((gif?.size || 0) - (webm?.size || 0)) / (gif?.size || 0) * 100) || 0} %</p>
                     <p>{webm?.type}</p>
                     <p>{duration || 0} s</p>
-                    <video src={webm ? URL.createObjectURL(webm) : ''} width={width} controls loop autoPlay />
+                    <video src={webm ? URL.createObjectURL(webm) : ''} width={width} controls loop autoPlay/>
                 </div>
             </div>
         </div>

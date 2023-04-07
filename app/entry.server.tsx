@@ -94,6 +94,9 @@ function handleBrowserRequest(
           const body = new PassThrough();
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+          responseHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
+          responseHeaders.set("Cross-Origin-Embedder-Policy", "credentialless");
 
           resolve(
             new Response(body, {
