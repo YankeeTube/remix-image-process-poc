@@ -44,7 +44,12 @@ export default function GIF() {
         const url = URL.createObjectURL(file)
         setGif(file)
         setGifSource(url)
-        await transcode(file)
+        try {
+            await transcode(file)
+        } catch (e) {
+            console.error(e)
+            alert('Not Support Browser')
+        }
     }
 
     const init = async () => await ffmpeg.load();
