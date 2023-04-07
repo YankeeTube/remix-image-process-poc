@@ -1,9 +1,7 @@
 import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg';
-import type {ChangeEvent} from "react";
 import {useEffect, useState} from "react";
 import type {HeadersFunction} from "@remix-run/node";
 import {useLoaderData} from "react-router";
-import {file} from "@babel/types";
 
 const MB = 1000 * 1000
 
@@ -13,12 +11,14 @@ export const headers: HeadersFunction = () => ({
 });
 
 export async function loader() {
-    const res = await fetch("https://api.waifu.pics/sfw/dance");
+    const keywords = ['blush', 'dance', 'highfive', 'cuddle', 'smile', 'wave', 'poke']
+    const keyword = keywords[Math.floor(Math.random() * keywords.length)]
+    const res = await fetch(`https://api.waifu.pics/sfw/${keyword}`);
     const {url} = await res.json()
     return url
 }
 
-const ffmpeg = createFFmpeg({log: true});
+const ffmpeg = createFFmpeg({log: false});
 
 export default function GIF() {
     const waifURL = useLoaderData() as string
@@ -34,8 +34,10 @@ export default function GIF() {
         const videoName = 'output.webm'
         const options = [
             '-i', 'image.gif',
+            '-c', 'vp9',
             '-c:v', 'libvpx',
             '-b:v', '1M',
+            '-crf', '25',
             '-pix_fmt', 'yuv420p',
             '-auto-alt-ref', '0',
             '-speed', '10',
@@ -44,8 +46,8 @@ export default function GIF() {
             '-y', videoName
         ];
         ffmpeg.FS('writeFile', 'image.gif', await fetchFile(file));
-
         await ffmpeg.run(...options);
+
         const data = ffmpeg.FS('readFile', videoName);
         setDuration(Math.ceil(((performance.now() - start) / 1000) * 100000) / 100000)
         setWebm(new Blob([data.buffer], {type: 'video/webm'}))
@@ -83,9 +85,12 @@ export default function GIF() {
                     <h2>Webm</h2>
                     <p>{(webm?.size || 0) / MB} MB</p>
                     <p>{Math.round(((gif?.size || 0) - (webm?.size || 0)) / (gif?.size || 0) * 100) || 0} %</p>
-                    <p>{webm?.type}</p>
-                    <p>{duration || 0} s</p>
-                    <video src={webm ? URL.createObjectURL(webm) : ''} width={width} controls loop autoPlay />
+                    <p>{webm?.type} / {duration || 0} s</p>
+                    {webm && (
+                        <video width={width} controls loop autoPlay playsInline muted>
+                            <source src={webm ? URL.createObjectURL(webm) : ''}/>
+                        </video>
+                    )}
                 </div>
             </div>
         </div>
